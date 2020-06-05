@@ -40,17 +40,44 @@ def batch_iou(boxes, box):
     """
     # implement similar to prev function, just scale for multiple boxes
     xc = np.maximum(
-        np.minimum(boxes[:, 0] + 0.5 * boxes[:, 2], box[0] + 0.5 * box[2]) - np.maximum(boxes[:, 0] - 0.5 * boxes[:, 2], box[0] - 0.5 * box[2]),
+        np.minimum(boxes[:, 0] + 0.5 * boxes[:, 2], box[0] + 0.5 * box[2]) - np.maximum(boxes[:, 0] - 0.5 * boxes[:, 2],
+                                                                                        box[0] - 0.5 * box[2]),
         0
     )
     yc = np.maximum(
-        np.minimum(boxes[:, 1] + 0.5 * boxes[:, 3], box[1] + 0.5 * box[3]) - np.maximum(boxes[:, 1] - 0.5 * boxes[:, 3], box[1] - 0.5 * box[3]),
+        np.minimum(boxes[:, 1] + 0.5 * boxes[:, 3], box[1] + 0.5 * box[3]) - np.maximum(boxes[:, 1] - 0.5 * boxes[:, 3],
+                                                                                        box[1] - 0.5 * box[3]),
         0
     )
 
     intersection = xc * yc
     union = boxes[:, 2] * boxes[:, 3] + box[2] * box[3] - intersection
 
-    return intersection/union
+    return intersection / union
+
+
+def nms(boxes, probs, threshold):
+    """
+    Performs Non-max Suppression.
+    href : https://github.com/liweiac/fire-FRD-CNN/blob/master/src/utils/util.py
+    :param boxes: array of [cx, cy, w, h] i.e detected box shapes
+    :param probs: probs score of each boxes
+    :param threshold: iou threshold or prob threshold for each boxes
+    :return: keep true or false for corresponding boxes satisfying the criteria
+    """
+    # grab the sorted indexes from our array containing prob for each boxes
+    order = probs.argsort()[::-1]
+    # initialize a response array containing the declaration for each boxes
+    # initialize by True by default
+    keep = [True] * len(order)
+
+    for i in range(len(order) - 1):
+        overlaps = batch_iou(boxes[order[i+1:]], boxes[order[i]])  # calculate overlaps for each box corresponding to the rest
+
+        for j, overlap in enumerate(overlaps):
+            if overlap > threshold:
+                keep[order[j+i+1]] = False
+
+    return keep
 
 
