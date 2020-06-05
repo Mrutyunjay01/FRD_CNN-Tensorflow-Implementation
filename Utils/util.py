@@ -72,12 +72,62 @@ def nms(boxes, probs, threshold):
     keep = [True] * len(order)
 
     for i in range(len(order) - 1):
-        overlaps = batch_iou(boxes[order[i+1:]], boxes[order[i]])  # calculate overlaps for each box corresponding to the rest
+        overlaps = batch_iou(boxes[order[i + 1:]],
+                             boxes[order[i]])  # calculate overlaps for each box corresponding to the rest
 
         for j, overlap in enumerate(overlaps):
             if overlap > threshold:
-                keep[order[j+i+1]] = False
+                keep[order[j + i + 1]] = False
 
     return keep
 
 
+def rgb_to_bgr(images):
+    """
+    convert list of images from BGR to RGB
+    :param images:
+    :return:
+    """
+    outImages = []
+    for image in images:
+        outImages.append(image[:, :, ::-1])
+
+    return outImages
+
+
+def bbox_transform(bbox):
+    """
+    convert a boundary box of form [cx, cy, w, h] to [xmin, ymin, xmax, ymax] i.e diagonal coords.
+    compatible with np array or tensors
+    :param bbox:
+    :return:
+    """
+    with tf.compat.v1.variable_scope('bbox_transform') as scope:
+        cx, cy, w, h = bbox  # extract from given format
+        outBox = [[]] * 4
+        outBox[0] = cx - w / 2
+        outBox[1] = cy - h / 2
+        outBox[2] = cx + w / 2
+        outBox[3] = cy + h / 2
+
+    return outBox
+
+
+def bbox_transform_inv(bbox):
+    """
+    convert from [xmin, ymin, xmax, ymax] format to [cx, cy, w, h]
+    :param bbox:
+    :return:
+    """
+    with tf.compat.v1.variable_scope('bbox_transform_inv') as scope:
+        xmin, ymin, xmax, ymax = bbox
+        outBox = [[]] * 4
+
+        w = xmax - xmin + 1
+        h = ymax - ymin + 1
+        outBox[0] = xmin + 0.5 * w
+        outBox[1] = ymin + 0.5 * h
+        outBox[2] = w
+        outBox[3] = h
+
+    return outBox
