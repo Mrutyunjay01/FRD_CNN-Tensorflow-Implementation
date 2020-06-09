@@ -82,7 +82,7 @@ def nms(boxes, probs, threshold):
     return keep
 
 
-def rgb_to_bgr(images):
+def bgr_to_rgb(images):
     """
     convert list of images from BGR to RGB
     :param images:
@@ -146,3 +146,15 @@ def safe_exp(w, thresh):
 
         out = lin_region * lin_out + (1. - lin_region) * exp_out
     return out
+
+
+def sparse_to_dense(sp_indices, output_shape, values, default_value=0):
+    """
+    A dense Mat from sparse one.
+    :param sp_indices: array containing index to place values
+    :param output_shape: shape of the dense desired mat
+    :param values: values corresponds to index in each row of sparse mat
+    :param default_value: for non-specified indices
+    :return: dense ndarray
+    """
+
