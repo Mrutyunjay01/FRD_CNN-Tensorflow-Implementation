@@ -131,3 +131,18 @@ def bbox_transform_inv(bbox):
         outBox[3] = h
 
     return outBox
+
+
+def safe_exp(w, thresh):
+    """Safe exponential function for tensors."""
+
+    slope = np.exp(thresh)
+    with tf.compat.v1.variable_scope('safe_exponential'):
+        lin_bool = w > thresh
+        lin_region = tf.compat.v1.to_float(lin_bool)
+
+        lin_out = slope * (w - thresh + 1.)
+        exp_out = tf.exp(tf.where(lin_bool, tf.zeros_like(w), w))
+
+        out = lin_region * lin_out + (1. - lin_region) * exp_out
+    return out
