@@ -157,4 +157,10 @@ def sparse_to_dense(sp_indices, output_shape, values, default_value=0):
     :param default_value: for non-specified indices
     :return: dense ndarray
     """
+    assert len(sp_indices) == len(values), 'Length of Sparse is not equal to values'
 
+    array = np.ones(output_shape) * default_value  # initialize with default values
+    for idx, value in zip(sp_indices, values):
+        array[tuple(idx)] = value
+
+    return array
