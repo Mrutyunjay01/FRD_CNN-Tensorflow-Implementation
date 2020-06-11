@@ -18,12 +18,13 @@ class ResNet50ConvDet(ModelSkeleton):
         """NN architecture."""
 
         mc = self.mc
+        '''
         if mc.LOAD_PRETRAINED_MODEL:
             assert tf.io.gfile.exists(mc.PRETRAINED_MODEL_PATH), \
                 'Cannot find pretrained model at the given path:' \
                 '  {}'.format(mc.PRETRAINED_MODEL_PATH)
             self.caffemodel_weight = joblib.load(mc.PRETRAINED_MODEL_PATH)
-
+        '''
         conv1 = self._conv_bn_layer(
             self.image_input, 'conv1', 'bn_conv1', 'scale_conv1', filters=64,
             size=7, stride=2, freeze=True, conv_with_bias=True)
