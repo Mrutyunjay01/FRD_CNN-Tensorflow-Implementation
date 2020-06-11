@@ -5,9 +5,11 @@ import sys
 import time
 
 import numpy as np
-from six.moves import xrange
+
 import tensorflow as tf
 import threading
+
+from scipy._lib.six import xrange
 
 from Configs.resnet50config import kitti_res50_config
 from DataPrep.pascal_voc import pascal_voc
