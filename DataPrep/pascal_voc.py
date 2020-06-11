@@ -11,8 +11,8 @@ from DataPrep.pascal_voc_eval import voc_eval
 
 class pascal_voc(imdb):
     def __init__(self, image_set, year, data_path, mc):
-        imdb.__init__(self, 'voc_' + year + '_' + image_set, mc)
-        self._year = year
+        imdb.__init__(self, 'voc_' + str(year) + '_' + image_set, mc)
+        self._year = str(year)
         self._image_set = image_set
         self._data_root_path = data_path
         self._data_path = os.path.join(self._data_root_path, 'VOC' + self._year)
