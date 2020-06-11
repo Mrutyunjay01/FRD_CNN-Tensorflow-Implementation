@@ -2,7 +2,7 @@ import os
 import random
 import shutil
 
-from PIL import Image, ImageFont, ImageDraw
+from PIL import Image, ImageDraw
 import cv2
 import numpy as np
 from Utils.util import iou, batch_iou
