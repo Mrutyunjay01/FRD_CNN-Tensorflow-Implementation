@@ -167,7 +167,7 @@ class ModelSkeleton:
             )
 
             # number of object. Used to normalize bbox and classification loss
-            self.num_objects = tf.reduce_sum(self.input_mask, name='num_objects')
+            self.num_objects = tf.compat.v1.reduce_sum(self.input_mask, name='num_objects')
 
         with tf.compat.v1.variable_scope('bbox') as scope:
             with tf.compat.v1.variable_scope('stretching'):
@@ -280,7 +280,7 @@ class ModelSkeleton:
             # add a small value into log to prevent blowing up
 
             self.class_loss = tf.truediv(
-                tf.reduce_sum(
+                tf.compat.v1.reduce_sum(
                     (self.labels * (-tf.math.log(self.pred_class_probs + mc.EPSILON))
                      + (1 - self.labels) * (-tf.math.log(1 - self.pred_class_probs + mc.EPSILON)))
                     * self.input_mask * mc.LOSS_COEF_CLASS),
@@ -292,7 +292,7 @@ class ModelSkeleton:
         with tf.compat.v1.variable_scope('confidence_score_regression') as scope:
             input_mask = tf.reshape(self.input_mask, [mc.BATCH_SIZE, mc.ANCHORS])
             self.conf_loss = tf.reduce_mean(
-                tf.reduce_sum(
+                tf.compat.v1.reduce_sum(
                     tf.square((self.ious - self.pred_conf))
                     * (input_mask * mc.LOSS_COEF_CONF_POS / self.num_objects
                        + (1 - input_mask) * mc.LOSS_COEF_CONF_NEG / (mc.ANCHORS - self.num_objects)),
@@ -301,11 +301,11 @@ class ModelSkeleton:
                 name='confidence_loss'
             )
             tf.compat.v1.add_to_collection('losses', self.conf_loss)
-            tf.summary.scalar('mean iou', tf.reduce_sum(self.ious) / self.num_objects)
+            tf.summary.scalar('mean iou', tf.compat.v1.reduce_sum(self.ious) / self.num_objects)
 
         with tf.compat.v1.variable_scope('bounding_box_regression') as scope:
             self.bbox_loss = tf.truediv(
-                tf.reduce_sum(
+                tf.compat.v1.reduce_sum(
                     mc.LOSS_COEF_BBOX * tf.square(
                         self.input_mask * (self.pred_box_delta - self.box_delta_input))),
                 self.num_objects,
@@ -388,7 +388,7 @@ class ModelSkeleton:
 
         with tf.compat.v1.variable_scope(conv_param_name) as scope:
             channels = inputs.get_shape()[3]
-
+            '''
             if mc.LOAD_PRETRAINED_MODEL:
                 cw = self.caffemodel_weight
                 kernel_val = np.transpose(cw[conv_param_name][0], [2, 3, 1, 0])
@@ -398,15 +398,15 @@ class ModelSkeleton:
                 var_val = cw[bn_param_name][1]
                 gamma_val = cw[scale_param_name][0]
                 beta_val = cw[scale_param_name][1]
-            else:
-                kernel_val = tf.compat.v1.truncated_normal_initializer(
-                    stddev=stddev, dtype=tf.float32)
-                if conv_with_bias:
-                    bias_val = tf.constant_initializer(0.0)
-                mean_val = tf.constant_initializer(0.0)
-                var_val = tf.constant_initializer(1.0)
-                gamma_val = tf.constant_initializer(1.0)
-                beta_val = tf.constant_initializer(0.0)
+            else:'''
+            kernel_val = tf.compat.v1.truncated_normal_initializer(
+                stddev=stddev, dtype=tf.float32)
+            if conv_with_bias:
+                bias_val = tf.constant_initializer(0.0)
+            mean_val = tf.constant_initializer(0.0)
+            var_val = tf.constant_initializer(1.0)
+            gamma_val = tf.constant_initializer(1.0)
+            beta_val = tf.constant_initializer(0.0)
 
             # re-order the caffe kernel with shape [out, in, h, w] -> tf kernel with
             # shape [h, w, in, out]
@@ -476,6 +476,7 @@ class ModelSkeleton:
 
         mc = self.mc
         use_pretrained_param = False
+        mc.LOAD_PRETRAINED_MODEL = False
         if mc.LOAD_PRETRAINED_MODEL:
             cw = self.caffemodel_weight
             if layer_name in cw:
