@@ -29,17 +29,19 @@ tf.compat.v1.flags.DEFINE_string('year', '2007',
 tf.compat.v1.flags.DEFINE_string('train_dir', '/media/scott/ubuntusoftware/squeezeDetplus9+DATA/logs/squeezedet/',
                                  """Directory where to write event logs """
                                  """and checkpoint.""")
-tf.compat.v1.flags.DEFINE_integer('max_steps', 140001,
+tf.compat.v1.flags.DEFINE_integer('max_steps', 140,
                                   """Maximum number of batches to run.""")
 tf.compat.v1.flags.DEFINE_string('net', 'squeezeDet',
                                  """Neural net architecture. """)
 tf.compat.v1.flags.DEFINE_string('pretrained_model_path', '',
                                  """Path to the pretrained model.""")
-tf.compat.v1.flags.DEFINE_integer('summary_step', 10,
+tf.compat.v1.flags.DEFINE_integer('summary_step', 5,
                                   """Number of steps to save summary.""")
-tf.compat.v1.flags.DEFINE_integer('checkpoint_step', 1000,
+tf.compat.v1.flags.DEFINE_integer('checkpoint_step', 10,
                                   """Number of steps to save summary.""")
-tf.compat.v1.flags.DEFINE_string('gpu', '0', """gpu id.""")
+
+
+# tf.compat.v1.flags.DEFINE_string('gpu', '0', """gpu id.""")
 
 
 # tf.compat.v1.app.flags.DEFINE_float('gpu_memory_fraction', 0.1, 'GPU memory fraction to use.')
@@ -114,7 +116,7 @@ def train():
     assert FLAGS.dataset == 'KITTI', \
         'Currently only support KITTI dataset'
 
-    os.environ['CUDA_VISIBLE_DEVICES'] = FLAGS.gpu
+    # os.environ['CUDA_VISIBLE_DEVICES'] = FLAGS.gpu
 
     with tf.Graph().as_default():
 
@@ -128,11 +130,11 @@ def train():
             mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
             model = VGG16ConvDet(mc)
         '''
-        if FLAGS.net == 'resnet50':
-            mc = kitti_res50_config()
-            mc.IS_TRAINING = True
-            mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
-            model = ResNet50ConvDet(mc)
+        #if FLAGS.net == 'resnet50':
+        mc = kitti_res50_config()
+        mc.IS_TRAINING = True
+        mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
+        model = ResNet50ConvDet(mc)
         '''
         elif FLAGS.net == 'squeezeDet':
             mc = kitti_squeezeDet_config()
@@ -145,7 +147,7 @@ def train():
             mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
             model = SqueezeDetPlus(mc)
         '''
-        imdb = pascal_voc(image_set=FLAGS.image_set, data_path=FLAGS.data_path, mc=mc, year=2012)
+        imdb = pascal_voc(FLAGS.image_set, FLAGS.year, FLAGS.data_path, mc)
 
         # save model size, flops, activations by layers
         with open(os.path.join(FLAGS.train_dir, 'model_metrics.txt'), 'w') as f:
@@ -254,7 +256,7 @@ def train():
         saver = tf.compat.v1.train.Saver(tf.compat.v1.global_variables())
         summary_op = tf.compat.v1.summary.merge_all()
 
-        ckpt = tf.train.get_checkpoint_state(FLAGS.train_dir)
+        ckpt = tf.compat.v1.train.get_checkpoint_state(FLAGS.train_dir)
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
 
@@ -263,7 +265,7 @@ def train():
         init = tf.compat.v1.global_variables_initializer()
         sess.run(init)
 
-        coord = tf.train.Coordinator()
+        coord = tf.compat.v1.train.Coordinator()
 
         if mc.NUM_THREAD > 0:
             enq_threads = []
