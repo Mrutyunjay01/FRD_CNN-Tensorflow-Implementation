@@ -43,7 +43,8 @@ def kitti_res50_config():
 
 
 def set_anchors(mc):
-    H, W, B = 24, 78, 9
+    # shape of output layer from feature extractor
+    H, W, B = 22, 76, 9
     anchor_shapes = np.reshape(
         [np.array(
             [[94., 49.], [225., 161.], [170., 91.],
