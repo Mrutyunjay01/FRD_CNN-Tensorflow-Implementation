@@ -135,7 +135,7 @@ class ModelSkeleton:
 
         with tf.compat.v1.variable_scope('interpret_output') as scope:
             preds = self.preds
-
+            print('Shape of output from feature Extractor: ', preds.shape, 'Anchors: ',mc.ANCHORS, '\n')
             # probability
             num_class_probs = mc.ANCHOR_PER_GRID * mc.CLASSES
             self.pred_class_probs = tf.reshape(
